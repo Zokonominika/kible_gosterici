@@ -58,8 +58,12 @@ document.addEventListener('DOMContentLoaded', () => {
             qiblaIndicator.style.transform = `rotate(${qiblaBearing}deg)`;
             
             // 4. Sensörü dinlemeye başla
+            // Her iki event türünü de dinleyeceğiz ama absolute olanı önceleyecek bir flag kullanmalıyız.
             window.addEventListener('deviceorientation', handleOrientation, true);
             window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+            
+            // Hata ayıklama panelini açalım (geliştirici testleri için çok faydalıdır)
+            document.getElementById('debug-info').classList.remove('hidden');
             
             // Arayüz geçişi
             startScreen.classList.add('hidden');
@@ -138,47 +142,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Pusula okuma ve UI Rotasyonu
-    // Bazı android tarayıcılar absoluteOrientation false olsa da webkitCompassHeading ile gerçek pusula verir (iOS)
-    let compassSmoothing = [];
+    let useAbsolute = false;
     
     function handleOrientation(event) {
-        let alpha = null;
+        let heading = null;
 
-        // iOS için webkitCompassHeading
         if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
-            alpha = event.webkitCompassHeading;
+            // iOS
+            heading = event.webkitCompassHeading;
         } 
-        // Android absolute event
-        else if (event.absolute || event.type === 'deviceorientationabsolute') {
-            // Android deviceorientation event return alpha based on Z axis rotation relative to North
-            // Normal event.alpha is sometimes relative. For true north, we rely on absolute if available.
-            // Android Chrome usually triggers deviceorientationabsolute.
-            // alpha is [0, 360), 0 is North, increasing counter-clockwise.
-            // Bu nedenle Pusula Yönü = 360 - event.alpha olur
+        else if (event.type === 'deviceorientationabsolute' || event.absolute === true) {
+            useAbsolute = true;
             if (event.alpha !== null) {
-               alpha = 360 - event.alpha; 
+               heading = 360 - event.alpha; 
             }
         } 
-        // Son çare (bazen çalışmaz çünkü relative olabilir)
-        else if (event.alpha !== null && event.alpha !== undefined) {
-             alpha = 360 - event.alpha;
+        else if (event.type === 'deviceorientation' && !useAbsolute) {
+             // Sadece absolute event desteklenmediğinde relative veriyi dene (Bazen sensör sadece bu şekilde yanıt verir)
+             if (event.alpha !== null) {
+                 heading = 360 - event.alpha;
+             }
         }
 
-        if (alpha !== null) {
-            // Basit bir pürüzsüzleştirme (Low-Pass Filter mantığı) eklenebilir. 
-            // Direkt alpha kullanıldığında titreşim olur.
-            // iOS'ta alpha direkt manyetik kuzeydir, dönüş saat yönündedir.
+        if (heading !== null) {
+            // Kuzey açısının düzgün hesaplanması ve titremeyi yok etme gibi matematiksel düzeltmeler yapılabilir.
+            debugAlpha.textContent = Math.round(heading);
             
-            debugAlpha.textContent = Math.round(alpha);
-            
-            // Pusula Kadrannı döndür. Kuzey üstte kalacak şekilde telefonu çevirdikçe kadranın döndüğünü göstermek için:
-            // Kadranın dönüş açısı = -alpha olmalıdır.
-            compassDial.style.transform = `rotate(${-alpha}deg)`;
+            // Kullanıcının isteği üzerine kadranı (Kuzey-Güney tabakasını) SABİT tutuyoruz.
+            // Kadranın telefonun tepesiyle aynı hizada kalması istendiği için kadran döndürülmüyor.
+            // Sadece Kıble İbresi (Kabe simgesi) telefonun asıl hedefine göre döndürülüyor:
+            let pointerRotation = qiblaBearing - heading;
+            qiblaIndicator.style.transform = `rotate(${pointerRotation}deg)`;
             
             // Kullanıcının kabe yönünü dönüp dönmediğini kontrol etme
-            // Telefondaki cihazın baktığı açı = alpha
-            // Kıble açısı = qiblaBearing
-            let diff = Math.abs((alpha - qiblaBearing + 360) % 360);
+            let diff = Math.abs((heading - qiblaBearing + 360) % 360);
             if (diff > 180) diff = 360 - diff;
             
             if (diff < 3) {
