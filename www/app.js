@@ -165,46 +165,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (heading === null) {
-            // Cihazın her sensör bildiriminde (Örn: Sadece ivmeölçer verisinde) pusula verisi (alpha) olmayabilir.
-            // Bu uyarıları ekrana yazdırırsak DOM'u kilitler ve telefonu yavaşlatır. Bu yüzden direkt sonlandırıyoruz.
             return;
         }
-
-        // --- Low-Pass Filter (Yumuşak Dönüş Algoritması) ---
-        // Kusursuz ve titremeyen bir dönüş için ibreyi yumuşatıyoruz
-        if (typeof window.smoothHeading === 'undefined') {
-            window.smoothHeading = heading;
+        
+        // ÖNEMLİ: Android cihazlarda telefon dik (vertical) tutulduğunda Euler açıları tersine döner (gimbal lock).
+        // Kullanıcı güneye bakarken güney, kuzeye bakarken de yine güney görebilir!
+        // Bunu önlemek için kullanıcının telefonu yere paralel tuttuğundan emin olmalıyız.
+        let isTilted = false;
+        if (event.beta !== undefined && event.beta !== null) {
+            if (Math.abs(event.beta) > 45) { // Telefon 45 dereceden fazla havaya dikilmişse
+                isTilted = true;
+            }
         }
-        let diffRaw = heading - window.smoothHeading;
-        diffRaw = ((diffRaw + 540) % 360) - 180;
-        window.smoothHeading = window.smoothHeading + (diffRaw * 0.15); // %15 pürüzsüz takip
         
-        let displayHeading = window.smoothHeading;
-
-        debugAlpha.textContent = Math.round(displayHeading);
-        
-        // KULLANICININ YENİ İSTEĞİ:
-        // 1. Alpha oku SABİTTİR. (HTML/CSS'te yukarı bakacak şekilde)
-        // 2. Kabe simgesi qiblaBearing'e göre pusulada SABİTTİR.
-        // 3. Pusula Çarkı baktığınız yöne (-heading) göre DÖNER.
-        
-        let rawDialRotation = -displayHeading;
-        
-        // 360 geçişlerde pürüzsüz dönüş için
-        if (typeof window.lastDialRot === 'undefined') {
-            window.lastDialRot = rawDialRotation;
+        if (isTilted) {
+            statusText.innerHTML = "⚠️ Lütfen telefonu yere tam paralel (düz) tutun!";
+            statusText.style.color = "#fbbf24"; // Turuncu uyarı
+            statusText.classList.remove('status-aligned');
+            return; // Hatalı veriyi işleme sokma (Kilitlenmenin önüne geçer)
+        } else {
+            statusText.style.color = ""; // Varsayılana dön
         }
-        let rotDiff = rawDialRotation - window.lastDialRot;
-        rotDiff = ((rotDiff + 540) % 360) - 180;
-        window.lastDialRot += rotDiff;
+
+        debugAlpha.textContent = Math.round(heading);
         
-        compassDial.style.transform = `rotate(${window.lastDialRot}deg)`;
+        // KULLANICININ İSTEDİĞİ EN TEMİZ 'DASHBOARD' MANTIĞI:
+        // 1. Kadran (Kuzey, Güney N-S-E-W) tamamen SABİT. N her zaman cihazın üstü.
+        // 2. Kabe simgesi qiblaBearing (Kıble yönü) neresiyse orada SABİT kalacak (Ekranda hareket etmez).
+        // 3. Kırmızı ALPHA oku sizinaktığınız yönü (heading) gerçek zamanlı gösterecek ve Kabe'ye denk getireceksiniz!
+        
+        compassDial.style.transform = `rotate(0deg)`; // Kadran sabit
+        
+        let rawRotation = heading;
+        
+        // CSS transition pürüzsüzleştirme var, JS gecikmesini (Kasma) kaldırıp doğrudan atıyoruz
+        // Sadece 360 derecelik fırıldak atlamasını önlüyoruz:
+        if (typeof window.lastAlphaRotation === 'undefined') {
+            window.lastAlphaRotation = rawRotation;
+        }
+        let diffRot = rawRotation - window.lastAlphaRotation;
+        diffRot = ((diffRot + 540) % 360) - 180;
+        let alphaRotation = window.lastAlphaRotation + diffRot;
+        window.lastAlphaRotation = alphaRotation;
+        
+        document.getElementById('alpha-indicator').style.transform = `rotate(${alphaRotation}deg)`;
         
         // Kullanıcının kabe yönünü dönüp dönmediğini kontrol etme
-        let diff = Math.abs((displayHeading - qiblaBearing + 360) % 360);
-        if (diff > 180) diff = 360 - diff;
+        let diffMatch = Math.abs((heading - qiblaBearing + 360) % 360);
+        if (diffMatch > 180) diffMatch = 360 - diffMatch;
         
-        if (diff < 3) {
+        if (diffMatch < 3) {
             // 3 derece hassasiyetle hedefte
             statusText.innerHTML = "Doğru Yöndesiniz!";
             statusText.classList.add('status-aligned');
