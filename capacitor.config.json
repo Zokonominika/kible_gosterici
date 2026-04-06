@@ -1,0 +1,6 @@
+{
+  "appId": "com.kible.pusula",
+  "appName": "Kıble Pusulası",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

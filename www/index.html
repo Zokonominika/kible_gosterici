@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kıble Pusulası</title>
+    <meta name="description" content="Kıble yönünü bulmanıza yardımcı olan modern, şık ve internetsiz çalışabilen pusula web uygulaması.">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app-container">
+        
+        <!-- Başlangıç / İzin Ekranı -->
+        <div id="start-screen" class="screen full-center">
+            <div class="glass-card">
+                <div class="icon-container">
+                    <svg viewBox="0 0 24 24" width="64" height="64" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="kaaba-icon-glow"><path d="M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="4 11 12 5 20 11"></polyline><path d="M12 5v16"></path><path d="M8 14h8"></path></svg>
+                </div>
+                <h1>Kıble Pusulası</h1>
+                <p>En doğru sonuç için, konum erişimine ve pusula sensörlerine izin verin. Lütfen cihazınızı düz ve manyetik alanlardan uzak tutun.</p>
+                <button id="start-btn" class="primary-btn">Pusulayı Başlat</button>
+                <div id="error-message" class="hidden"></div>
+            </div>
+        </div>
+
+        <!-- Ana Pusula Ekranı -->
+        <div id="compass-screen" class="screen hidden">
+            <header>
+                <h2>Kıble Yönü</h2>
+                <div id="location-info">Konum aranıyor...</div>
+            </header>
+
+            <main class="compass-wrapper full-center">
+                <div class="compass-container">
+                    <!-- Sabit dış çember -->
+                    <div class="compass-outer-ring"></div>
+                    
+                    <!-- Dönen kısım (kuzeye göre dönecek olan kadran) -->
+                    <div id="compass-dial" class="compass-dial">
+                        <span class="direction n">N</span>
+                        <span class="direction e">E</span>
+                        <span class="direction s">S</span>
+                        <span class="direction w">W</span>
+                        <div class="tick-marks"></div>
+                        
+                        <!-- Kıble göstergesi (Kabe İkonu) -->
+                        <!-- app.js içinden derecesi (transform rotation) ayarlanacak -->
+                        <div id="qibla-indicator" class="qibla-indicator">
+                            <div class="kaaba-marker">
+                                <svg viewBox="0 0 24 24" width="24" height="24" stroke="black" stroke-width="2" fill="currentColor" class="kaaba-svg">
+                                    <rect x="5" y="7" width="14" height="14" rx="1" fill="#fff" stroke="#D4AF37" stroke-width="1"></rect>
+                                    <rect x="5" y="10" width="14" height="3" fill="#D4AF37"></rect>
+                                    <line x1="5" y1="7" x2="19" y2="7" stroke="#D4AF37" stroke-width="2"></line>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alt kısımda açı bilgileri veya tam hedefe gelinip gelinmediğini belirten metin -->
+                <div class="info-panel">
+                    <div id="distance-info" class="hidden">Kabe'ye Uzaklık: <span id="distance-val">...</span> km</div>
+                    <div id="status-text">Cihaz yönü hesaplanıyor...</div>
+                    <div id="debug-info" class="hidden">Alpha: <span id="alpha-val">0</span>&deg; | Kıble: <span id="qibla-val">0</span>&deg;</div>
+                </div>
+            </main>
+        </div>
+        
+    </div>
+
+    <!-- Matematiksel hesaplamalar ve sensör API mantığı -->
+    <script src="app.js"></script>
+</body>
+</html>

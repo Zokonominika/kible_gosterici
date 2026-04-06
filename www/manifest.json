@@ -1,0 +1,17 @@
+{
+  "name": "Kıble Pusulası",
+  "short_name": "Kıble",
+  "description": "Kıble yönünü gösteren modern pusula uygulaması.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
