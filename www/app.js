@@ -168,21 +168,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Kuzey açısının düzgün hesaplanması ve titremeyi yok etme gibi matematiksel düzeltmeler yapılabilir.
             debugAlpha.textContent = Math.round(heading);
             
-            // Kullanıcının isteği üzerine kadranı (Kuzey-Güney tabakasını) SABİT tutuyoruz.
-            // Sadece Kıble İbresi (Kabe simgesi) telefonun asıl hedefine göre döndürülüyor:
-            let rawPointerRotation = qiblaBearing - heading;
+            // Kullanıcının yeni isteği üzerine:
+            // Kadran (Kuzey, Güney okları) SABİT.
+            // Kabe ibresi (qiblaIndicator) SABİT (Açılışta kabe açısına yerleştirildi).
+            // Sadece Kırmızı Alpha İbresi kullanıcının döndüğü yöne (heading) göre döner.
+            let rawAlphaRotation = heading;
             
             // 360 derecelik geçişlerde (359 -> 0 gibi) okun tam tersine fırıldak gibi dönmesini engellemek için:
-            if (typeof window.lastPointerRotation === 'undefined') {
-                window.lastPointerRotation = rawPointerRotation;
+            if (typeof window.lastAlphaRotation === 'undefined') {
+                window.lastAlphaRotation = rawAlphaRotation;
             }
-            let diffRot = rawPointerRotation - window.lastPointerRotation;
+            let diffRot = rawAlphaRotation - window.lastAlphaRotation;
             // Açıyı -180 ile +180 arasına indirgeriz
             diffRot = ((diffRot + 540) % 360) - 180;
-            let pointerRotation = window.lastPointerRotation + diffRot;
-            window.lastPointerRotation = pointerRotation;
+            let alphaRotation = window.lastAlphaRotation + diffRot;
+            window.lastAlphaRotation = alphaRotation;
             
-            qiblaIndicator.style.transform = `rotate(${pointerRotation}deg)`;
+            document.getElementById('alpha-indicator').style.transform = `rotate(${alphaRotation}deg)`;
             
             // Kullanıcının kabe yönünü dönüp dönmediğini kontrol etme
             let diff = Math.abs((heading - qiblaBearing + 360) % 360);

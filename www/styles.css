@@ -217,7 +217,7 @@ header h2 {
 .direction.s { bottom: -15px; left: 50%; }
 .direction.w { top: 50%; left: 15px; }
 
-/* Kıble İbresi Zemin */
+/* Sabit Kıble İbresi Zemin */
 .qibla-indicator {
     position: absolute;
     top: 0;
@@ -225,26 +225,55 @@ header h2 {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    transition: transform 0.2s ease-out; /* Pürüzsüz İbre Dönüşü */
+    /* transition kaldırıldı, çünkü artık sabit kalacak */
 }
 
 .kaaba-marker {
     position: absolute;
-    top: 15px; /* Pusulanın biraz içine konumlandır */
+    top: 5px; /* Dış çembere yakın */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
     filter: drop-shadow(0 0 10px var(--accent-glow));
+    z-index: 5;
 }
 
-.kaaba-marker::after {
+/* Dinamik Yön (Alpha) İbresi */
+.alpha-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transition: transform 0.2s ease-out; /* Pürüzsüz animasyon */
+    z-index: 10;
+}
+
+.arrow-marker {
+    position: absolute;
+    top: 35px; /* Kabe ikonunun altında kalsın */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 25px solid #ef4444; /* Kırmızı Pusula Oku */
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
+}
+
+.arrow-marker::after {
     content: '';
-    width: 2px;
-    height: 120px;
-    background: linear-gradient(to bottom, var(--accent-color), transparent);
-    margin-top: 4px;
+    position: absolute;
+    top: 25px;
+    left: -2px;
+    width: 4px;
+    height: 90px;
+    background: linear-gradient(to bottom, #ef4444, transparent);
+    border-radius: 2px;
 }
 
 /* Center dot */
@@ -280,11 +309,12 @@ header h2 {
 
 .status-aligned {
     color: var(--green-success) !important;
-    font-size: 32px !important; /* Dede için çok büyük font */
-    font-weight: 700 !important;
-    letter-spacing: 1px;
-    transform: scale(1.1); /* Hafifçe büyür */
-    text-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    font-size: 38px !important; /* Dede için ÇOK DAHA büyük font */
+    font-weight: 800 !important;
+    letter-spacing: 2px;
+    transform: scale(1.15); /* Hafifçe daha büyüyecek */
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.8), 0 0 10px rgba(16, 185, 129, 0.5);
+    line-height: 1.2;
 }
 
 /* Tick marks logic using conic gradient */

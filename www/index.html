@@ -49,16 +49,20 @@
                         <span class="direction w">W</span>
                         <div class="tick-marks"></div>
                         
-                        <!-- Kıble göstergesi (Kabe İkonu) -->
-                        <!-- app.js içinden derecesi (transform rotation) ayarlanacak -->
+                        <!-- Sabit Kıble göstergesi (Kabe İkonu) -->
                         <div id="qibla-indicator" class="qibla-indicator">
                             <div class="kaaba-marker">
-                                <svg viewBox="0 0 24 24" width="24" height="24" stroke="black" stroke-width="2" fill="currentColor" class="kaaba-svg">
-                                    <rect x="5" y="7" width="14" height="14" rx="1" fill="#fff" stroke="#D4AF37" stroke-width="1"></rect>
+                                <svg viewBox="0 0 24 24" width="28" height="28" stroke="black" stroke-width="2" fill="currentColor" class="kaaba-svg">
+                                    <rect x="5" y="7" width="14" height="14" rx="1" fill="#1e293b" stroke="#D4AF37" stroke-width="1"></rect>
                                     <rect x="5" y="10" width="14" height="3" fill="#D4AF37"></rect>
                                     <line x1="5" y1="7" x2="19" y2="7" stroke="#D4AF37" stroke-width="2"></line>
                                 </svg>
                             </div>
+                        </div>
+
+                        <!-- Kullanıcının baktığı yönü temsil eden Dönen İbre (Alpha) -->
+                        <div id="alpha-indicator" class="alpha-indicator">
+                            <div class="arrow-marker"></div>
                         </div>
                     </div>
                 </div>
