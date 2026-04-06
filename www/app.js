@@ -168,23 +168,24 @@ document.addEventListener('DOMContentLoaded', () => {
             // Kuzey açısının düzgün hesaplanması ve titremeyi yok etme gibi matematiksel düzeltmeler yapılabilir.
             debugAlpha.textContent = Math.round(heading);
             
-            // Kullanıcının yeni isteği üzerine:
-            // Kadran (Kuzey, Güney okları) SABİT.
-            // Kabe ibresi (qiblaIndicator) SABİT (Açılışta kabe açısına yerleştirildi).
-            // Sadece Kırmızı Alpha İbresi kullanıcının döndüğü yöne (heading) göre döner.
-            let rawAlphaRotation = heading;
+            // KULLANICININ YENİ İSTEĞİ ÜZERİNE TASARIM:
+            // 1. Alpha İbresi TAMAMEN SABİT ve her zaman YUKARI (telefonun önü) bakıyor. HTML/CSS'te sabitlendi, burada kod yok.
+            // 2. Kabe İbresi PUSULA ÇARKINDA SABİT. Açılışta qiblaBearing (Kıble açısı) nereyeyse oraya konuldu.
+            // 3. Pusula Çarkı KULLANICININ BAKTIĞI YÖNE (heading) GÖRE DÖNÜYOR. (Örn: Kuzeye bakıyorsa Kuzey yukarıda)
             
-            // 360 derecelik geçişlerde (359 -> 0 gibi) okun tam tersine fırıldak gibi dönmesini engellemek için:
-            if (typeof window.lastAlphaRotation === 'undefined') {
-                window.lastAlphaRotation = rawAlphaRotation;
+            let rawDialRotation = -heading;
+            
+            // 360 derecelik geçişlerde (359 -> 0 gibi) çarkın tam tersine fırıldak gibi dönmesini engellemek için:
+            if (typeof window.lastDialRotation === 'undefined') {
+                window.lastDialRotation = rawDialRotation;
             }
-            let diffRot = rawAlphaRotation - window.lastAlphaRotation;
+            let diffRot = rawDialRotation - window.lastDialRotation;
             // Açıyı -180 ile +180 arasına indirgeriz
             diffRot = ((diffRot + 540) % 360) - 180;
-            let alphaRotation = window.lastAlphaRotation + diffRot;
-            window.lastAlphaRotation = alphaRotation;
+            let dialRotation = window.lastDialRotation + diffRot;
+            window.lastDialRotation = dialRotation;
             
-            document.getElementById('alpha-indicator').style.transform = `rotate(${alphaRotation}deg)`;
+            compassDial.style.transform = `rotate(${dialRotation}deg)`;
             
             // Kullanıcının kabe yönünü dönüp dönmediğini kontrol etme
             let diff = Math.abs((heading - qiblaBearing + 360) % 360);
