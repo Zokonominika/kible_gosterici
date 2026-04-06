@@ -164,48 +164,58 @@ document.addEventListener('DOMContentLoaded', () => {
              }
         }
 
-        if (heading !== null) {
-            // Kuzey açısının düzgün hesaplanması ve titremeyi yok etme gibi matematiksel düzeltmeler yapılabilir.
-            debugAlpha.textContent = Math.round(heading);
+        if (heading === null) {
+            // Cihazın her sensör bildiriminde (Örn: Sadece ivmeölçer verisinde) pusula verisi (alpha) olmayabilir.
+            // Bu uyarıları ekrana yazdırırsak DOM'u kilitler ve telefonu yavaşlatır. Bu yüzden direkt sonlandırıyoruz.
+            return;
+        }
+
+        // --- Low-Pass Filter (Yumuşak Dönüş Algoritması) ---
+        // Kusursuz ve titremeyen bir dönüş için ibreyi yumuşatıyoruz
+        if (typeof window.smoothHeading === 'undefined') {
+            window.smoothHeading = heading;
+        }
+        let diffRaw = heading - window.smoothHeading;
+        diffRaw = ((diffRaw + 540) % 360) - 180;
+        window.smoothHeading = window.smoothHeading + (diffRaw * 0.15); // %15 pürüzsüz takip
+        
+        let displayHeading = window.smoothHeading;
+
+        debugAlpha.textContent = Math.round(displayHeading);
+        
+        // KULLANICININ YENİ İSTEĞİ:
+        // 1. Alpha oku SABİTTİR. (HTML/CSS'te yukarı bakacak şekilde)
+        // 2. Kabe simgesi qiblaBearing'e göre pusulada SABİTTİR.
+        // 3. Pusula Çarkı baktığınız yöne (-heading) göre DÖNER.
+        
+        let rawDialRotation = -displayHeading;
+        
+        // 360 geçişlerde pürüzsüz dönüş için
+        if (typeof window.lastDialRot === 'undefined') {
+            window.lastDialRot = rawDialRotation;
+        }
+        let rotDiff = rawDialRotation - window.lastDialRot;
+        rotDiff = ((rotDiff + 540) % 360) - 180;
+        window.lastDialRot += rotDiff;
+        
+        compassDial.style.transform = `rotate(${window.lastDialRot}deg)`;
+        
+        // Kullanıcının kabe yönünü dönüp dönmediğini kontrol etme
+        let diff = Math.abs((displayHeading - qiblaBearing + 360) % 360);
+        if (diff > 180) diff = 360 - diff;
+        
+        if (diff < 3) {
+            // 3 derece hassasiyetle hedefte
+            statusText.innerHTML = "Doğru Yöndesiniz!";
+            statusText.classList.add('status-aligned');
             
-            // KULLANICININ YENİ İSTEĞİ ÜZERİNE TASARIM:
-            // 1. Alpha İbresi TAMAMEN SABİT ve her zaman YUKARI (telefonun önü) bakıyor. HTML/CSS'te sabitlendi, burada kod yok.
-            // 2. Kabe İbresi PUSULA ÇARKINDA SABİT. Açılışta qiblaBearing (Kıble açısı) nereyeyse oraya konuldu.
-            // 3. Pusula Çarkı KULLANICININ BAKTIĞI YÖNE (heading) GÖRE DÖNÜYOR. (Örn: Kuzeye bakıyorsa Kuzey yukarıda)
-            
-            let rawDialRotation = -heading;
-            
-            // 360 derecelik geçişlerde (359 -> 0 gibi) çarkın tam tersine fırıldak gibi dönmesini engellemek için:
-            if (typeof window.lastDialRotation === 'undefined') {
-                window.lastDialRotation = rawDialRotation;
-            }
-            let diffRot = rawDialRotation - window.lastDialRotation;
-            // Açıyı -180 ile +180 arasına indirgeriz
-            diffRot = ((diffRot + 540) % 360) - 180;
-            let dialRotation = window.lastDialRotation + diffRot;
-            window.lastDialRotation = dialRotation;
-            
-            compassDial.style.transform = `rotate(${dialRotation}deg)`;
-            
-            // Kullanıcının kabe yönünü dönüp dönmediğini kontrol etme
-            let diff = Math.abs((heading - qiblaBearing + 360) % 360);
-            if (diff > 180) diff = 360 - diff;
-            
-            if (diff < 3) {
-                // 3 derece hassasiyetle hedefte
-                statusText.innerHTML = "Doğru Yöndesiniz!";
-                statusText.classList.add('status-aligned');
-                
-                // Titreşim bildirimi
-                if (navigator.vibrate) {
-                    // Yalnızca yeni hizalanıldığında bir kez titretmek için flag eklenebilir ama şu an için basit.
-                }
-            } else {
-                statusText.innerHTML = "Cihazı çevirerek Kabe ikonu ile eşleşin";
-                statusText.classList.remove('status-aligned');
+            // Titreşim bildirimi
+            if (navigator.vibrate) {
+                // Yalnızca yeni hizalanıldığında titretebilir
             }
         } else {
-            statusText.textContent = "Pusula verisi alınamıyor!";
+            statusText.innerHTML = "Doğru açıyı bulmak için yavaşça dönün...";
+            statusText.classList.remove('status-aligned');
         }
     }
 });
