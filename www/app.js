@@ -187,42 +187,24 @@ document.addEventListener('DOMContentLoaded', () => {
             statusText.style.color = ""; // Varsayılana dön
         }
 
-        debugAlpha.textContent = Math.round(heading);
+        // --- PİYASADAKİ EN OPTİMAL / PROFESYONEL PUSULA MANTIĞI ---
+        // 1. Kadran (Kuzey, Güney N-S-E-W) dünyanın manyetik alanına yapışık gibi döner (-heading).
+        // 2. Kabe simgesi (qiblaBearing) kadrana çivilidir. Gerçek yön neresiyse oraya döner.
+        // 3. Merkezdeki ok sabittir (telefonun burnu). Siz döndükçe kabe de oka yaklaşır.
         
-        // KULLANICININ İSTEDİĞİ EN TEMİZ 'DASHBOARD' MANTIĞI:
-        // 1. Kadran (Kuzey, Güney N-S-E-W) tamamen SABİT. N her zaman cihazın üstü.
-        // 2. Kabe simgesi qiblaBearing (Kıble yönü) neresiyse orada SABİT kalacak (Ekranda hareket etmez).
-        // 3. Kırmızı ALPHA oku sizinaktığınız yönü (heading) gerçek zamanlı gösterecek ve Kabe'ye denk getireceksiniz!
+        // CSS animasyonunu kaldırdık, saf matematiği FPS hızında basıyoruz. Asla fırıldak sorunu yaşanmaz.
+        compassDial.style.transform = `rotate(${-heading}deg)`;
         
-        compassDial.style.transform = `rotate(0deg)`; // Kadran sabit
-        
-        let rawRotation = heading;
-        
-        // CSS transition pürüzsüzleştirme var, JS gecikmesini (Kasma) kaldırıp doğrudan atıyoruz
-        // Sadece 360 derecelik fırıldak atlamasını önlüyoruz:
-        if (typeof window.lastAlphaRotation === 'undefined') {
-            window.lastAlphaRotation = rawRotation;
-        }
-        let diffRot = rawRotation - window.lastAlphaRotation;
-        diffRot = ((diffRot + 540) % 360) - 180;
-        let alphaRotation = window.lastAlphaRotation + diffRot;
-        window.lastAlphaRotation = alphaRotation;
-        
-        document.getElementById('alpha-indicator').style.transform = `rotate(${alphaRotation}deg)`;
-        
-        // Kullanıcının kabe yönünü dönüp dönmediğini kontrol etme
+        // Kullanıcının kabe yönünü dönüp dönmediğini kontrol etme.
+        // Dümdüz 0-360 hesaplaması: (Baktığım Yön - Kabe Yönü) farkı 0'a yakın mı?
         let diffMatch = Math.abs((heading - qiblaBearing + 360) % 360);
-        if (diffMatch > 180) diffMatch = 360 - diffMatch;
         
-        if (diffMatch < 3) {
-            // 3 derece hassasiyetle hedefte
+        // Hedefe pay bırakma (0 derece olması imkansızdır, 3 derece tolerans)
+        // Eğer diffMatch < 3 ise (tam üstünde) veya diffMatch > 357 ise (360'a tam tur attıysa) doğru yöndesiniz.
+        if (diffMatch <= 3 || diffMatch >= 357) {
             statusText.innerHTML = "Doğru Yöndesiniz!";
             statusText.classList.add('status-aligned');
-            
-            // Titreşim bildirimi
-            if (navigator.vibrate) {
-                // Yalnızca yeni hizalanıldığında titretebilir
-            }
+            if (navigator.vibrate) {} // Titreşim
         } else {
             statusText.innerHTML = "Doğru açıyı bulmak için yavaşça dönün...";
             statusText.classList.remove('status-aligned');
