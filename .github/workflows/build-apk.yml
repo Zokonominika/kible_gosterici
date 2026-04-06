@@ -31,6 +31,10 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Gerekli Android İzinlerini Enjekte Et
+        run: |
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />' android/app/src/main/AndroidManifest.xml
+
       - name: APK Derleme İşlemi (Assemble Debug)
         working-directory: ./android
         run: ./gradlew assembleDebug

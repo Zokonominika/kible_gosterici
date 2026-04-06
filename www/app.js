@@ -101,7 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
             navigator.geolocation.getCurrentPosition(resolve, (err) => {
                 let msg = "";
                 switch(err.code) {
-                    case err.PERMISSION_DENIED: msg = "Konum izni reddedildi."; break;
+                    case err.PERMISSION_DENIED: 
+                        msg = "Konum izni reddedildi. APK içerisinden çalışıyorsanız lütfen ayarlardan (Ayarlar > Uygulamalar > Kıble Pusulası > İzinler) Konum iznini açın."; 
+                        break;
                     case err.POSITION_UNAVAILABLE: msg = "Konum bilgisi alınamıyor."; break;
                     case err.TIMEOUT: msg = "Konum isteği zaman aşımına uğradı."; break;
                     default: msg = "Bilinmeyen bir konum hatası oluştu.";
