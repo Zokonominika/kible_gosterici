@@ -169,9 +169,19 @@ document.addEventListener('DOMContentLoaded', () => {
             debugAlpha.textContent = Math.round(heading);
             
             // Kullanıcının isteği üzerine kadranı (Kuzey-Güney tabakasını) SABİT tutuyoruz.
-            // Kadranın telefonun tepesiyle aynı hizada kalması istendiği için kadran döndürülmüyor.
             // Sadece Kıble İbresi (Kabe simgesi) telefonun asıl hedefine göre döndürülüyor:
-            let pointerRotation = qiblaBearing - heading;
+            let rawPointerRotation = qiblaBearing - heading;
+            
+            // 360 derecelik geçişlerde (359 -> 0 gibi) okun tam tersine fırıldak gibi dönmesini engellemek için:
+            if (typeof window.lastPointerRotation === 'undefined') {
+                window.lastPointerRotation = rawPointerRotation;
+            }
+            let diffRot = rawPointerRotation - window.lastPointerRotation;
+            // Açıyı -180 ile +180 arasına indirgeriz
+            diffRot = ((diffRot + 540) % 360) - 180;
+            let pointerRotation = window.lastPointerRotation + diffRot;
+            window.lastPointerRotation = pointerRotation;
+            
             qiblaIndicator.style.transform = `rotate(${pointerRotation}deg)`;
             
             // Kullanıcının kabe yönünü dönüp dönmediğini kontrol etme

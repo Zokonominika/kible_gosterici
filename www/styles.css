@@ -225,7 +225,7 @@ header h2 {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    /* Transformation angle will be calculated in JS */
+    transition: transform 0.2s ease-out; /* Pürüzsüz İbre Dönüşü */
 }
 
 .kaaba-marker {
@@ -266,22 +266,25 @@ header h2 {
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px);
     border-radius: 16px;
-    padding: 16px 24px;
+    padding: 24px 24px;
     text-align: center;
-    width: 90%;
-    max-width: 300px;
+    width: 100%;
+    max-width: 400px;
 }
 
 #status-text {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 400;
-    transition: color 0.3s;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .status-aligned {
     color: var(--green-success) !important;
-    font-weight: 600 !important;
-    text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    font-size: 32px !important; /* Dede için çok büyük font */
+    font-weight: 700 !important;
+    letter-spacing: 1px;
+    transform: scale(1.1); /* Hafifçe büyür */
+    text-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
 }
 
 /* Tick marks logic using conic gradient */
